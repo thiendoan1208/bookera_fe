@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
+import { Playfair_Display, Inter, Sacramento } from "next/font/google";
 import "./globals.css";
-
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair-display",
@@ -11,6 +10,12 @@ const playfairDisplay = Playfair_Display({
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+});
+
+const sacramento = Sacramento({
+  variable: "--font-sacramento",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${playfairDisplay.variable} ${inter.variable} antialiased`}
+        className={`${playfairDisplay.variable} ${inter.variable} ${sacramento.variable} antialiased`}
       >
         {children}
       </body>

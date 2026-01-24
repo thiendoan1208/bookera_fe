@@ -1,4 +1,5 @@
 import { TextHoverEffect } from "@/components/ui/text-hover-effect";
+import routes from "@/routes/routes";
 import Link from "next/link";
 
 export default function Home() {
@@ -10,7 +11,7 @@ export default function Home() {
           THE ERA OF BOOKS
         </h2>
         <div>
-          <Link href="/home">
+          <Link href={routes.home}>
             <button className="text-md md:text-2xl uppercase rounded-full bg-gray-800 text-white px-6 py-4 my-6 hover:bg-gray-700 transition-colors cursor-pointer animate-[fade-in_3s]">
               Let&apos;s Begin
             </button>
