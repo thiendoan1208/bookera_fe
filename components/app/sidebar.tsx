@@ -14,7 +14,7 @@ const navItems = [
 
 function Sidebar() {
   return (
-    <div className="w-24 h-full m-0 p-0 fixed left-0 top-0 bg-white/40 backdrop-blur-md">
+    <div className="w-24 h-full m-0 p-0 fixed left-0 top-0 bg-(--bg-primary)/80 backdrop-blur-md z-50">
       <div className="h-full flex flex-col items-center mt-24 space-y-8">
         {navItems.map((item) => (
           <div
