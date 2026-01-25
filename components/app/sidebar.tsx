@@ -1,10 +1,11 @@
 import routes from "@/routes/routes";
-import { House, Sparkles, Store } from "lucide-react";
+import { Hash, House, Sparkles, Store } from "lucide-react";
 import Link from "next/link";
 
 const navItems = [
   { name: "Home", icon: <House />, link: routes.home },
   { name: "Marketplace", icon: <Store />, link: routes.marketplace },
+  { name: "Topic", icon: <Hash />, link: routes.topic },
   {
     name: "Assistant",
     icon: <Sparkles />,
@@ -15,7 +16,7 @@ const navItems = [
 function Sidebar() {
   return (
     <div className="w-24 h-full m-0 p-0 fixed left-0 top-0 bg-(--bg-primary)/80 backdrop-blur-md z-50">
-      <div className="h-full flex flex-col items-center mt-24 space-y-8">
+      <div className="h-full flex flex-col items-center mt-24 space-y-4">
         {navItems.map((item) => (
           <div
             key={item.name}

@@ -1,5 +1,6 @@
 "use client";
 
+import { categories } from "@/data/categories";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -12,4 +13,15 @@ export function getScreenWidth(): number {
     return 0;
   }
   return window.innerWidth;
+}
+
+export function getRandomSubject(): string {
+  const subjects = [];
+
+  for (let i = 0; i < categories.length; i++) {
+    subjects.push(categories[i].subjects);
+  }
+
+  const randomIndex = Math.floor(Math.random() * subjects.flat().length);
+  return subjects.flat()[randomIndex].slug;
 }

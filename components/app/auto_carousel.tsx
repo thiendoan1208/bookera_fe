@@ -10,7 +10,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { useRef, useState, useEffect } from "react";
 import type { CarouselApi } from "@/components/ui/carousel";
 import Image from "next/image";
-import { auto_carousel_images } from "@/routes/auto_carousel_images";
+import { auto_carousel_images } from "@/data/auto_carousel_images";
 
 export function AutoCarousel() {
   const plugin = useRef(Autoplay({ delay: 20000 }));
@@ -42,13 +42,14 @@ export function AutoCarousel() {
             <CarouselItem key={index} className="pl-0">
               <div className="h-full">
                 <Card className="h-full border-none shadow-none rounded-none py-0">
-                  <CardContent className="h-full flex aspect-square items-center justify-center">
+                  <CardContent className="h-full flex aspect-square items-center justify-center px-0">
                     <Image
                       src={auto_carousel_images[index].src}
                       alt={`Slide ${index + 1}`}
                       width={500}
                       height={500}
                       className="w-full h-full object-cover object-center"
+                      loading="eager"
                     />
                   </CardContent>
                 </Card>

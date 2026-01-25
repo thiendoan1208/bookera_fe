@@ -1,0 +1,126 @@
+export const categories: {
+  key: string;
+  title: string;
+  subjects: { label: string; slug: string }[];
+}[] = [
+  {
+    key: "arts",
+    title: "Arts",
+    subjects: [
+      { label: "Architecture", slug: "architecture" },
+      { label: "Art Instruction", slug: "art_instruction" },
+      { label: "Art History", slug: "art_history" },
+      { label: "Dance", slug: "dance" },
+      { label: "Design", slug: "design" },
+      { label: "Fashion", slug: "fashion" },
+      { label: "Film", slug: "film" },
+      { label: "Graphic Design", slug: "graphic_design" },
+      { label: "Music", slug: "music" },
+      { label: "Music Theory", slug: "music_theory" },
+      { label: "Painting", slug: "painting" },
+      { label: "Photography", slug: "photography" },
+    ],
+  },
+  {
+    key: "animals",
+    title: "Animals",
+    subjects: [
+      { label: "Bears", slug: "bears" },
+      { label: "Cats", slug: "cats" },
+      { label: "Kittens", slug: "kittens" },
+      { label: "Dogs", slug: "dogs" },
+      { label: "Puppies", slug: "puppies" },
+    ],
+  },
+  {
+    key: "fiction",
+    title: "Fiction",
+    subjects: [
+      { label: "Fantasy", slug: "fantasy" },
+      { label: "Historical Fiction", slug: "historical_fiction" },
+      { label: "Horror", slug: "horror" },
+      { label: "Humor", slug: "humor" },
+      { label: "Literature", slug: "literature" },
+      { label: "Magic", slug: "magic" },
+      { label: "Mystery & Detective", slug: "mystery_and_detective_stories" },
+      { label: "Plays", slug: "plays" },
+      { label: "Poetry", slug: "poetry" },
+      { label: "Romance", slug: "romance" },
+      { label: "Science Fiction", slug: "science_fiction" },
+      { label: "Short Stories", slug: "short_stories" },
+      { label: "Thriller", slug: "thriller" },
+      { label: "Young Adult", slug: "young_adult" },
+    ],
+  },
+  {
+    key: "science_and_math",
+    title: "Science & Math",
+    subjects: [
+      { label: "Biology", slug: "biology" },
+      { label: "Chemistry", slug: "chemistry" },
+      { label: "Mathematics", slug: "mathematics" },
+      { label: "Physics", slug: "physics" },
+      { label: "Programming", slug: "programming" },
+    ],
+  },
+  {
+    key: "business_and_finance",
+    title: "Business & Finance",
+    subjects: [
+      { label: "Management", slug: "management" },
+      { label: "Entrepreneurship", slug: "entrepreneurship" },
+      { label: "Business Economics", slug: "business_economics" },
+      { label: "Business Success", slug: "business_success" },
+      { label: "Finance", slug: "finance" },
+    ],
+  },
+  {
+    key: "history",
+    title: "History",
+    subjects: [
+      { label: "Ancient Civilization", slug: "ancient_civilization" },
+      { label: "Archaeology", slug: "archaeology" },
+      { label: "Anthropology", slug: "anthropology" },
+      { label: "World War II", slug: "world_war_ii" },
+      { label: "Social Life & Customs", slug: "social_life_and_customs" },
+    ],
+  },
+  {
+    key: "health_and_wellness",
+    title: "Health & Wellness",
+    subjects: [
+      { label: "Cooking", slug: "cooking" },
+      { label: "Cookbooks", slug: "cookbooks" },
+      { label: "Mental Health", slug: "mental_health" },
+      { label: "Exercise", slug: "exercise" },
+      { label: "Nutrition", slug: "nutrition" },
+      { label: "Self-help", slug: "self_help" },
+    ],
+  },
+  {
+    key: "biography",
+    title: "Biography",
+    subjects: [
+      { label: "Autobiographies", slug: "autobiographies" },
+      { label: "Politics & Government", slug: "politics_and_government" },
+      { label: "Women", slug: "women" },
+      { label: "Kings & Rulers", slug: "kings_and_rulers" },
+      { label: "Composers", slug: "composers" },
+      { label: "Artists", slug: "artists" },
+    ],
+  },
+  {
+    key: "textbooks",
+    title: "Textbooks",
+    subjects: [
+      { label: "History", slug: "history" },
+      { label: "Mathematics", slug: "mathematics" },
+      { label: "Geography", slug: "geography" },
+      { label: "Psychology", slug: "psychology" },
+      { label: "Algebra", slug: "algebra" },
+      { label: "Education", slug: "education" },
+      { label: "Business & Economics", slug: "business_and_economics" },
+      { label: "Computer Science", slug: "computer_science" },
+    ],
+  },
+];
