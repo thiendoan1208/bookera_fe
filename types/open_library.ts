@@ -28,3 +28,108 @@ export interface WorksBySubjectResponse {
   work_count: number;
   works: Work[];
 }
+
+export interface TypeLink {
+  key: string;
+}
+
+export interface DateTime {
+  type: string;
+  value: string;
+}
+
+export interface LinkDetail {
+  title: string;
+  url: string;
+  type: TypeLink;
+}
+
+export interface FirstSentence {
+  type: string;
+  value: string;
+}
+
+export interface AuthorDetail {
+  author: {
+    key: string;
+  };
+  type: TypeLink;
+}
+
+export interface Excerpt {
+  excerpt: string;
+  comment: string;
+  author: {
+    key: string;
+  };
+}
+
+export interface Identifiers {
+  wikidata?: string[];
+  goodreads?: string[];
+  isfdb?: string[];
+  librarything?: string[];
+  musicbrainz?: string[];
+  bookbrainz?: string[];
+  [key: string]: string[] | undefined;
+}
+
+export interface WorkDetailsResponse {
+  description?: string;
+  title: string;
+  key: string;
+  authors: AuthorDetail[];
+  type: TypeLink;
+  covers?: number[];
+  first_sentence?: FirstSentence;
+  first_publish_date?: string;
+  links?: LinkDetail[];
+  subject_places?: string[];
+  subjects?: string[];
+  subject_people?: string[];
+  subject_times?: string[];
+  excerpts?: Excerpt[];
+  identifiers?: Identifiers;
+  latest_revision?: number;
+  revision?: number;
+  created?: DateTime;
+  last_modified?: DateTime;
+  [key: string]: unknown;
+}
+
+export interface AuthorDetailsResponse {
+  name: string;
+  key: string;
+  type: TypeLink;
+  birth_date?: string;
+  death_date?: string;
+  fuller_name?: string;
+  personal_name?: string;
+  title?: string;
+  bio?: string | { type: string; value: string };
+  alternate_names?: string[];
+  photos?: number[];
+  links?: LinkDetail[];
+  website?: string;
+  entity_type?: string;
+  source_records?: string[];
+  remote_ids?: {
+    viaf?: string;
+    goodreads?: string;
+    storygraph?: string;
+    isni?: string;
+    librarything?: string;
+    amazon?: string;
+    wikidata?: string;
+    imdb?: string;
+    musicbrainz?: string;
+    lc_naf?: string;
+    opac_sbn?: string;
+    [key: string]: string | undefined;
+  };
+  latest_revision?: number;
+  revision?: number;
+  created?: DateTime;
+  last_modified?: DateTime;
+  [key: string]: unknown;
+}

@@ -6,7 +6,7 @@ const routes = {
   assistant: "/home/assistant",
 
   // item routes
-  bookDetails: (workId: string) => `/home/detail/${workId}`,
+  bookDetails: (key: string) => `/home/${key}`,
 
   //subject topic route
   subjectTopic: (subject: string) => `/home/topic/${subject}`,

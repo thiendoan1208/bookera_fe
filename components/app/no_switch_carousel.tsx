@@ -9,7 +9,7 @@ function NoSwitchCarousel({
   data,
   isFetching,
 }: {
-  data: WorksBySubjectResponse | { works: [] };
+  data: WorksBySubjectResponse | { works: [] } | undefined;
   isFetching: boolean;
 }) {
   return (
@@ -30,7 +30,7 @@ function NoSwitchCarousel({
             ? // Show actual books when data is loaded
               data.works.map((book, index: number) => (
                 <Link
-                  href={routes.bookDetails(book.key.split("/").pop() || "")}
+                  href={routes.bookDetails(book.key)}
                   key={`book-${index}`}
                   className="group cursor-pointer"
                 >

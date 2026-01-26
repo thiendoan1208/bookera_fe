@@ -25,3 +25,13 @@ export function getRandomSubject(): string {
   const randomIndex = Math.floor(Math.random() * subjects.flat().length);
   return subjects.flat()[randomIndex].slug;
 }
+
+export const slugify = (text: string): string => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-");
+};

@@ -1,5 +1,9 @@
 import axios from "./../config/axios";
-import { WorksBySubjectResponse } from "@/types/open_library";
+import {
+  WorksBySubjectResponse,
+  WorkDetailsResponse,
+  AuthorDetailsResponse,
+} from "@/types/open_library";
 import { CAROUSEL_CONFIG } from "@/data/carousel_items";
 
 const getWorksBySubject = async (
@@ -18,4 +22,29 @@ const getWorksBySubject = async (
   }
 };
 
-export { getWorksBySubject };
+const getWorkDetails = async (
+  type: string,
+  workKey: string,
+): Promise<WorkDetailsResponse> => {
+  try {
+    const response = await axios.get(`/${type}/${workKey}.json`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching work details:", error);
+    throw error;
+  }
+};
+
+const getAuthorDetails = async (
+  authorKey: string,
+): Promise<AuthorDetailsResponse> => {
+  try {
+    const response = await axios.get(`${authorKey}.json`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching author details:", error);
+    throw error;
+  }
+};
+
+export { getWorksBySubject, getWorkDetails, getAuthorDetails };
