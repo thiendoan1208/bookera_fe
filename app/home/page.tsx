@@ -6,7 +6,6 @@ import { getWorksBySubject } from "@/service/open_lib";
 import { getRandomSubject } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import { HOME_SUBJECTS } from "@/data/home_subjects";
-import Link from "next/link";
 import routes from "@/routes/routes";
 
 function HomePage() {
@@ -28,7 +27,7 @@ function HomePage() {
   return (
     <>
       <AutoCarousel />
-      <div className="pl-24 pr-14 pt-6 space-y-12">
+      <div className="pl-28 pr-14 pt-6 space-y-12">
         <div>
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-3xl font-bold text-zinc-800 font-[poppins]">
@@ -56,13 +55,17 @@ function HomePage() {
                 {HOME_SUBJECTS[index].charAt(0).toUpperCase() +
                   HOME_SUBJECTS[index].slice(1)}{" "}
               </h1>
-              <Link
-                href={routes.subjectTopic(HOME_SUBJECTS[index])}
+              <div
+                onClick={() =>
+                  (window.location.href = routes.subjectTopic(
+                    HOME_SUBJECTS[index],
+                  ))
+                }
                 className="flex items-center font-semibold text-zinc-500 hover:text-zinc-800 cursor-pointer transition-colors"
               >
                 More
                 <ChevronRight className="size-5 translate-y-px" />
-              </Link>
+              </div>
             </div>
             {query.isFetching && !query.data ? (
               <NoSwitchCarousel

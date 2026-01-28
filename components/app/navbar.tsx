@@ -2,27 +2,49 @@
 
 import Logo from "@/components/app/logo";
 import { Input } from "@/components/ui/input";
-import { Bell, ChevronDown, LogIn, Search } from "lucide-react";
+import { Bell, ChevronDown, LogIn, Search, LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useMutation } from "@tanstack/react-query";
+import { searchWorks } from "@/service/open_lib";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { categories } from "@/data/categories";
+import routes from "@/routes/routes";
+import Link from "next/link";
 
 function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const router = useRouter();
+
+  const searchMutation = useMutation({
+    mutationFn: (query: string) => searchWorks(query),
+    onSuccess: () => {
+      router.push(routes.searchResult(searchInput));
+    },
+    onError: (error) => {
+      console.error("Search error:", error);
+    },
+  });
+
+  const handleSearch = () => {
+    if (searchInput.trim()) {
+      searchMutation.mutate(searchInput);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,7 +69,7 @@ function Navbar() {
         <div className="flex items-center space-x-1 ml-6 cursor-pointer select-none text-zinc-900 hover:text-zinc-800 transition-colors">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="flex itemcenter space-x-1">
+              <div className="flex items-center space-x-1">
                 <h1 className="text-[16.5px] font-medium text-zinc-800">
                   Category
                 </h1>
@@ -69,7 +91,13 @@ function Navbar() {
                         key={`subject-${subIndex}`}
                         className="hover:bg-zinc-100 cursor-pointer"
                       >
-                        {subject.label}
+                        <Link
+                          href={routes.subjectTopic(subject.slug)}
+                          className="w-full"
+                        >
+                          {" "}
+                          {subject.label}
+                        </Link>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuGroup>
@@ -82,11 +110,22 @@ function Navbar() {
 
       <div className="ml-auto flex items-center space-x-4">
         {/* Search */}
-        <div className="flex items-center">
-          <Search className="size-5 absolute ml-3 mt-2.5 text-zinc-800 mb-2" />
+        <div className="flex items-center relative">
+          {searchMutation.isPending ? (
+            <LoaderCircle className="size-5 absolute ml-3 mt-2.5 text-zinc-800 mb-2 animate-spin" />
+          ) : (
+            <Search
+              className="size-5 absolute ml-3 mt-2.5 text-zinc-800 mb-2 cursor-pointer hover:text-zinc-600 transition-colors"
+              onClick={handleSearch}
+            />
+          )}
           <Input
             className="rounded-2xl pl-10 pr-4 py-2"
             placeholder="Enter book name, author,..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={searchMutation.isPending}
           />
         </div>
         {/* Noti */}

@@ -15,6 +15,8 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getRandomSubject, slugify } from "@/lib/utils";
 import NoSwitchCarousel from "@/components/app/no_switch_carousel";
+import Link from "next/link";
+import routes from "@/routes/routes";
 
 interface DetailPageProps {
   params: Promise<{
@@ -72,13 +74,13 @@ function DetailPage({ params }: DetailPageProps) {
                 ) : (
                   <Image
                     loading="lazy"
-                    className="absolute inset-0 h-full w-full rounded-2xl bg-[#000000] object-cover"
+                    className="absolute inset-0 h-full w-full rounded-2xl object-cover"
                     alt={bookDetail.data?.title || "Book cover"}
                     src={
                       bookDetail.data?.covers &&
                       bookDetail.data.covers.length > 0
                         ? `${process.env.NEXT_PUBLIC_OPEN_LIBRARY_COVERS_URL}/b/id/${bookDetail.data.covers[0]}-M.jpg`
-                        : "https://images.unsplash.com/photo-1505506874110-6a7a69069a08?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        : "/default-fallback-image.png"
                     }
                     style={{
                       boxShadow: "rgba(0, 0, 0, 0.1) 0px 2px 4px 0px",
@@ -154,14 +156,22 @@ function DetailPage({ params }: DetailPageProps) {
               {/* Authors */}
               {bookDetail.data.authors &&
                 bookDetail.data.authors.length > 0 && (
-                  <p className="text-zinc-600 text-lg italic font-semibold">
+                  <div className="text-zinc-600 text-lg italic font-semibold">
                     <span className="mr-2 font-normal">by</span>
                     {authorQueries.some((q) => q.isLoading)
                       ? "Loading author..."
-                      : authorQueries
-                          .map((q) => q.data?.name || "Unknown Author")
-                          .join(", ")}
-                  </p>
+                      : authorQueries.map((q, index) => (
+                          <React.Fragment key={`author-${index}`}>
+                            <Link
+                              href={routes.searchResult(q.data?.name || "")}
+                              className="hover:text-blue-700 transition-colors"
+                            >
+                              {q.data?.name}
+                            </Link>
+                            {index < authorQueries.length - 1 && ", "}
+                          </React.Fragment>
+                        ))}
+                  </div>
                 )}
 
               {/* Description */}

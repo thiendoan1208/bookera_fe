@@ -3,13 +3,14 @@ import {
   WorksBySubjectResponse,
   WorkDetailsResponse,
   AuthorDetailsResponse,
+  SearchWorksResponse,
 } from "@/types/open_library";
 import { CAROUSEL_CONFIG } from "@/data/carousel_items";
 
 const getWorksBySubject = async (
   subject: string,
-  limit = CAROUSEL_CONFIG.DEFAULT_BOOKS_LIMIT,
-  offset = CAROUSEL_CONFIG.DEFAULT_OFFSET,
+  limit: number = CAROUSEL_CONFIG.DEFAULT_BOOKS_LIMIT,
+  offset: number = CAROUSEL_CONFIG.DEFAULT_OFFSET,
 ): Promise<WorksBySubjectResponse> => {
   try {
     const response = await axios.get(
@@ -47,4 +48,20 @@ const getAuthorDetails = async (
   }
 };
 
-export { getWorksBySubject, getWorkDetails, getAuthorDetails };
+const searchWorks = async (
+  query: string,
+  limit = 10,
+  offset = 0,
+): Promise<SearchWorksResponse> => {
+  try {
+    const response = await axios.get(
+      `/search.json?q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error searching works:", error);
+    throw error;
+  }
+};
+
+export { getWorksBySubject, getWorkDetails, getAuthorDetails, searchWorks };

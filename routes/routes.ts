@@ -10,6 +10,10 @@ const routes = {
 
   //subject topic route
   subjectTopic: (subject: string) => `/home/topic/${subject}`,
+
+  // search route
+  searchResult: (query: string) =>
+    `/home/search_result?q=${encodeURIComponent(query)}`,
 };
 
 export default routes;
