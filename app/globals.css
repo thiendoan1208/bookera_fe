@@ -82,7 +82,6 @@
   
   /* App color variable */
   --bg-primary: #F8F8F8;
-  --text-primary: 
 }
 
 .dark {
@@ -122,6 +121,9 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  html {
+    scrollbar-gutter: stable;
   }
   body {
     @apply bg-background text-foreground;

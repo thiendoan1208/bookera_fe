@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${playfairDisplay.variable} ${inter.variable} ${sacramento.variable} ${poppins.variable} antialiased overflow-x-hidden`}
+        className={`${playfairDisplay.variable} ${inter.variable} ${sacramento.variable} ${poppins.variable} antialiased overflow-x-hidden bg-(--bg-primary)`}
       >
         <TanstackProvider>{children}</TanstackProvider>
       </body>

@@ -14,6 +14,10 @@ const routes = {
   // search route
   searchResult: (query: string) =>
     `/home/search_result?q=${encodeURIComponent(query)}`,
+
+  // auth routes
+  login: "/login",
+  signup: "/signup",
 };
 
 export default routes;

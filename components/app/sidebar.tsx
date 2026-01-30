@@ -35,13 +35,19 @@ function Sidebar() {
             >
               {item.name == "Assistant" ? (
                 <div className="flex flex-col items-center justify-center p-3 bg-linear-to-tr from-purple-500 via-pink-500 to-red-500 rounded-full text-white">
-                  <Link href={item.link} className="flex flex-col items-center">
+                  <Link
+                    href={item.link}
+                    className="flex flex-col items-center w-full"
+                  >
                     {item.icon}
                   </Link>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center p-3 rounded-full transition-colors">
-                  <Link href={item.link} className="flex flex-col items-center">
+                  <Link
+                    href={item.link}
+                    className="flex flex-col items-center w-full"
+                  >
                     {item.icon}
                     <h1 className="font-semibold text-sm">{item.name}</h1>
                   </Link>

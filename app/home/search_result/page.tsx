@@ -58,7 +58,7 @@ function SearchResultPage() {
   const totalFound = data?.pages[0]?.numFound || 0;
 
   return (
-    <div className="min-h-screen bg-white px-8 py-6 pl-28 pt-18">
+    <div className="min-h-screen bg-white pl-28 pt-18 pr-10">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl text-zinc-700 mb-6 font-semibold">

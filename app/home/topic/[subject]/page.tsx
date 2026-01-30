@@ -68,7 +68,7 @@ function SubjectPage({ params }: SubjectPageProps) {
   const subjectName = data?.pages[0]?.name || subject.replace(/_/g, " ");
 
   return (
-    <div className="min-h-screen bg-white px-8 py-6 pl-28 pt-18">
+    <div className="min-h-screen bg-white pl-28 pt-18 pr-10">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl text-zinc-800 mb-2 font-bold capitalize">

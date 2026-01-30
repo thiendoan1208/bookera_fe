@@ -27,7 +27,7 @@ function HomePage() {
   return (
     <>
       <AutoCarousel />
-      <div className="pl-28 pr-14 pt-6 space-y-12">
+      <div className="pl-28 pt-18 pr-10 space-y-12">
         <div>
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-3xl font-bold text-zinc-800 font-[poppins]">

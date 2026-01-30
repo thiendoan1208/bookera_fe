@@ -61,7 +61,7 @@ function DetailPage({ params }: DetailPageProps) {
   });
 
   return (
-    <div className="pl-28 pt-18">
+    <div className="pl-28 pt-18 pr-10">
       {/* Image */}
 
       <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10">
