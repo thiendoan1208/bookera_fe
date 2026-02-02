@@ -1,33 +1,56 @@
 import axios from "axios";
 
-const instance = axios.create({
+// Axios instance for Open Library API
+const openLibraryInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_OPEN_LIBRARY_API_URL,
 });
 
-// Add a request interceptor
-instance.interceptors.request.use(
+openLibraryInstance.interceptors.request.use(
   function (config) {
-    // Do something before request is sent
     return config;
   },
   function (error) {
-    // Do something with request error
     return Promise.reject(error);
   },
 );
 
-// Add a response interceptor
-instance.interceptors.response.use(
+openLibraryInstance.interceptors.response.use(
   function (response) {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
     return response;
   },
   function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
     return Promise.reject(error);
   },
 );
 
-export default instance;
+// Axios instance for Backend API
+const backendInstance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: true,
+});
+
+// Add a request interceptor for backend
+backendInstance.interceptors.request.use(
+  function (config) {
+    return config;
+  },
+  function (error) {
+    return Promise.reject(error);
+  },
+);
+
+// Add a response interceptor for backend
+backendInstance.interceptors.response.use(
+  function (response) {
+    return response;
+  },
+  function (error) {
+    return Promise.reject(error);
+  },
+);
+
+export default openLibraryInstance;
+export { backendInstance };

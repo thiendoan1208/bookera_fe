@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Inter, Sacramento, Poppins } from "next/font/google";
 import "./globals.css";
-import { TanstackProvider } from "./providers";
+import { Providers } from "./providers";
+import { Toaster } from "sonner";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair-display",
@@ -40,7 +41,8 @@ export default function RootLayout({
       <body
         className={`${playfairDisplay.variable} ${inter.variable} ${sacramento.variable} ${poppins.variable} antialiased overflow-x-hidden bg-(--bg-primary)`}
       >
-        <TanstackProvider>{children}</TanstackProvider>
+        <Providers>{children}</Providers>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

@@ -18,6 +18,12 @@ const routes = {
   // auth routes
   login: "/login",
   signup: "/signup",
+
+  // saved items
+  savedItems: "/home/saved_items",
+
+  // settings
+  settings: "/home/setting",
 };
 
 export default routes;

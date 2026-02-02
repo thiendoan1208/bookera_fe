@@ -18,7 +18,6 @@ const getWorksBySubject = async (
     );
     return response.data;
   } catch (error) {
-    console.error("Error fetching works by subject:", error);
     throw error;
   }
 };
@@ -31,7 +30,6 @@ const getWorkDetails = async (
     const response = await axios.get(`/${type}/${workKey}.json`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching work details:", error);
     throw error;
   }
 };
@@ -43,7 +41,6 @@ const getAuthorDetails = async (
     const response = await axios.get(`${authorKey}.json`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching author details:", error);
     throw error;
   }
 };
@@ -59,7 +56,6 @@ const searchWorks = async (
     );
     return response.data;
   } catch (error) {
-    console.error("Error searching works:", error);
     throw error;
   }
 };

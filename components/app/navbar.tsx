@@ -10,11 +10,16 @@ import {
   User,
   LogOut,
   Bookmark,
+  Settings,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { searchWorks } from "@/service/open_lib";
+import { logout } from "@/service/auth_service";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useUser } from "@/contexts/UserContext";
+import { EditProfileDialog } from "@/components/app/edit-profile-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,17 +36,33 @@ import Image from "next/image";
 function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchInput, setSearchInput] = useState("");
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const router = useRouter();
+  const { user, loading, clearUser } = useUser();
 
   const searchMutation = useMutation({
     mutationFn: (query: string) => searchWorks(query),
     onSuccess: () => {
       router.push(routes.searchResult(searchInput));
     },
-    onError: (error) => {
-      console.error("Search error:", error);
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      clearUser(); // Clear user from context
+      toast.success("Logged out successfully");
+      router.push(routes.login);
+      router.refresh(); // Refresh to clear any cached data
+    },
+    onError: () => {
+      toast.error("Failed to logout");
     },
   });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   const handleSearch = () => {
     if (searchInput.trim()) {
@@ -63,10 +84,6 @@ function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const user = {
-    name: "John Doe",
-  };
 
   return (
     <div
@@ -105,15 +122,24 @@ function Navbar() {
           <div className="w-0.5 h-6 bg-zinc-400"></div>
         </div>
 
-        {user ? (
+        {loading ? (
+          // Loading state
+          <div className="ml-4 mb-1">
+            <LoaderCircle className="size-8 animate-spin text-zinc-400" />
+          </div>
+        ) : user ? (
           // User Profile Avatar with Dropdown
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className="ml-4 mb-1 cursor-pointer">
                 <div className="size-9 rounded-full overflow-hidden border-2 border-zinc-300 hover:border-zinc-500 transition-all">
                   <Image
-                    src="/default_image/default_profile_avatar.jpg"
-                    alt={user.name}
+                    src={
+                      user.avatar_url == "default_avatar"
+                        ? "/default_image/default_profile_avatar.jpg"
+                        : user.avatar_url
+                    }
+                    alt={user.username}
                     width={36}
                     height={36}
                     className="object-cover select-none"
@@ -125,28 +151,48 @@ function Navbar() {
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
-                    {user.name}
+                    {user.username}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    Welcome back!
+                    {user.email}
                   </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setIsEditProfileOpen(true)}
+                >
                   <User className="mr-2 size-4" />
                   <span>Edit Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Bookmark className="mr-2 size-4" />
-                  <span>Save Item</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600">
-                  <LogOut className="mr-2 size-4" />
-                  <span>Logout</span>
-                </DropdownMenuItem>
               </DropdownMenuGroup>
+              <DropdownMenuGroup>
+                <Link href="/home/saved">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Bookmark className="mr-2 size-4" />
+                    <span>Saved Items</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/home/settings">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Settings className="mr-2 size-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                </Link>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer text-red-600 focus:text-red-600"
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
+              >
+                <LogOut className="mr-2 size-4 text-red-600" />
+                <span>
+                  {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                </span>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
@@ -160,6 +206,12 @@ function Navbar() {
           </Link>
         )}
       </div>
+
+      {/* Edit Profile Dialog */}
+      <EditProfileDialog
+        open={isEditProfileOpen}
+        onOpenChange={setIsEditProfileOpen}
+      />
     </div>
   );
 }

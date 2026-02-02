@@ -1,24 +1,77 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
+import { useState, FormEvent, useEffect } from "react";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useUser } from "@/contexts/UserContext";
 import Logo from "@/components/app/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import routes from "@/routes/routes";
+import {
+  signIn,
+  sendRecoverCode,
+  verifyRecoverCode,
+  resetPassword,
+} from "@/service/auth_service";
 
 interface LoginFormData {
   email: string;
   password: string;
 }
 
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 function LoginPage() {
+  const router = useRouter();
+  const { user, loading, refreshUser } = useUser();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
   });
-
   const [errors, setErrors] = useState<Partial<LoginFormData>>({});
+
+  // Forgot password states
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [recoveryCode, setRecoveryCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [step, setStep] = useState<"email" | "code" | "reset">("email");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user) {
+      router.push(routes.home);
+    }
+  }, [user, loading, router]);
+
+  const signInMutation = useMutation({
+    mutationFn: signIn,
+    onSuccess: async () => {
+      toast.success("Welcome back!");
+      await refreshUser(); // Refresh user data in context
+      router.push(routes.home);
+    },
+    onError: () => {
+      toast.error("Failed to sign in. Please check your email or password.");
+    },
+  });
 
   const validateForm = (): boolean => {
     const newErrors: Partial<LoginFormData> = {};
@@ -39,7 +92,10 @@ function LoginPage() {
     e.preventDefault();
 
     if (validateForm()) {
-      console.log("Login Form Data:", formData);
+      signInMutation.mutate({
+        email: formData.email,
+        password: formData.password,
+      });
     }
   };
 
@@ -49,6 +105,98 @@ function LoginPage() {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const handleGoogleSignIn = (credentialResponse: CredentialResponse) => {
+    if (credentialResponse.credential) {
+      signInMutation.mutate({ credential: credentialResponse.credential });
+    } else {
+      toast.error("Google sign in failed - no credential received");
+    }
+  };
+
+  // Forgot password handlers
+  const handleSendCode = async () => {
+    if (!forgotEmail.trim()) {
+      toast.error("Please enter your email");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await sendRecoverCode(forgotEmail);
+      toast.success("Recovery code sent to your email");
+      setStep("code");
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error && "response" in error
+          ? (error as ApiError).response?.data?.message
+          : undefined;
+      toast.error(errorMessage || "Failed to send recovery code");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!recoveryCode.trim()) {
+      toast.error("Please enter the recovery code");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await verifyRecoverCode(forgotEmail, recoveryCode);
+      toast.success("Code verified successfully");
+      setStep("reset");
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error && "response" in error
+          ? (error as ApiError).response?.data?.message
+          : undefined;
+      toast.error(errorMessage || "Invalid or expired code");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!newPassword.trim()) {
+      toast.error("Please enter a password");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await resetPassword(forgotEmail, recoveryCode, newPassword);
+      toast.success("Password reset successfully. Please sign in.");
+      setIsForgotPasswordOpen(false);
+      setStep("email");
+      setForgotEmail("");
+      setRecoveryCode("");
+      setNewPassword("");
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error && "response" in error
+          ? (error as ApiError).response?.data?.message
+          : undefined;
+      toast.error(errorMessage || "Failed to reset password");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetForgotPasswordDialog = () => {
+    setIsForgotPasswordOpen(false);
+    setStep("email");
+    setForgotEmail("");
+    setRecoveryCode("");
+    setNewPassword("");
   };
 
   return (
@@ -81,6 +229,7 @@ function LoginPage() {
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 aria-invalid={!!errors.email}
                 className="w-full"
+                autoComplete="email"
               />
               {errors.email && (
                 <p className="text-xs text-destructive mt-1">{errors.email}</p>
@@ -93,16 +242,18 @@ function LoginPage() {
                 <label htmlFor="password" className="text-sm font-medium">
                   Password
                 </label>
-                <Link
-                  href="#"
-                  className="text-xs text-blue-600 hover:underline"
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPasswordOpen(true)}
+                  className="text-xs text-blue-600 hover:underline cursor-pointer"
                 >
                   Forgot password?
-                </Link>
+                </button>
               </div>
               <Input
                 id="password"
                 type="password"
+                autoComplete="current-password"
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
                 aria-invalid={!!errors.password}
@@ -116,8 +267,13 @@ function LoginPage() {
             </div>
 
             {/* Sign in button */}
-            <Button type="submit" className="w-full" size="lg">
-              Sign in
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={signInMutation.isPending}
+            >
+              {signInMutation.isPending ? "Signing in..." : "Sign in"}
             </Button>
           </form>
 
@@ -133,32 +289,12 @@ function LoginPage() {
 
           {/* OAuth buttons */}
           <div className="space-y-3">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              size="lg"
-            >
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              Continue with Google
-            </Button>
+            <GoogleLogin
+              onSuccess={handleGoogleSignIn}
+              onError={() => {
+                toast.error("Google sign in failed");
+              }}
+            />
           </div>
         </div>
 
@@ -175,6 +311,124 @@ function LoginPage() {
           </p>
         </div>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog
+        open={isForgotPasswordOpen}
+        onOpenChange={(open) => {
+          if (step === "reset" && !open) {
+            return;
+          }
+          resetForgotPasswordDialog();
+        }}
+      >
+        <DialogContent className="sm:max-w-112.5 bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-semibold">
+              {step === "email" && "Forgot Password"}
+              {step === "code" && "Enter Recovery Code"}
+              {step === "reset" && "Reset Password"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {step === "email" && (
+              <div>
+                <label className="text-sm font-semibold mb-2 block">
+                  Email address
+                </label>
+                <Input
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  className="w-full"
+                  placeholder="Enter your email"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  We&apos;ll send a 6-digit recovery code to your email.
+                </p>
+              </div>
+            )}
+
+            {step === "code" && (
+              <div>
+                <label className="text-sm font-semibold mb-2 block">
+                  Recovery Code
+                </label>
+                <Input
+                  type="text"
+                  value={recoveryCode}
+                  onChange={(e) => setRecoveryCode(e.target.value)}
+                  className="w-full text-center text-2xl tracking-widest"
+                  placeholder="000000"
+                  maxLength={6}
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  Enter the 6-digit code sent to {forgotEmail}
+                </p>
+              </div>
+            )}
+
+            {step === "reset" && (
+              <div>
+                <label className="text-sm font-semibold mb-2 block">
+                  New Password
+                </label>
+                <Input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full"
+                  placeholder="Enter new password"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  Password must be at least 6 characters.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            {step !== "reset" && (
+              <Button
+                variant="outline"
+                onClick={resetForgotPasswordDialog}
+                className="px-6"
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+            )}
+            {step === "email" && (
+              <Button
+                onClick={handleSendCode}
+                className="px-6 bg-black hover:bg-gray-800 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? "Sending..." : "Send Code"}
+              </Button>
+            )}
+            {step === "code" && (
+              <Button
+                onClick={handleVerifyCode}
+                className="px-6 bg-black hover:bg-gray-800 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? "Verifying..." : "Verify Code"}
+              </Button>
+            )}
+            {step === "reset" && (
+              <Button
+                onClick={handleResetPassword}
+                className="px-6 bg-black hover:bg-gray-800 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? "Resetting..." : "Reset Password"}
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
