@@ -24,6 +24,16 @@ const routes = {
 
   // settings
   settings: "/home/setting",
+
+  // marketplace
+  sellItem: "/home/marketplace/sell",
+  manageListings: "/home/marketplace/manage",
+  itemDetail: (id: number) => `/home/marketplace/item/${id}`,
+  checkout: "/checkout",
+  orderHistory: "/home/marketplace/order-history",
+
+  // messages
+  messages: "/messages",
 };
 
 export default routes;

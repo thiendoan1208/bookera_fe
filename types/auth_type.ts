@@ -15,6 +15,9 @@ export interface SignInResponse {
     username: string;
     email: string;
     avatar_url?: string;
+    phone_number?: string;
+    phone_verified?: boolean;
+    billing_address?: string;
   };
 }
 
@@ -35,4 +38,19 @@ export interface GoogleSignUpData {
 
 export interface GoogleSignInData {
   credential: string;
+}
+
+export interface UpdateBillingInfoData {
+  phone_number?: string;
+  phone_verified?: boolean;
+  billing_address?: string;
+}
+
+export interface UpdateBillingInfoResponse {
+  message: string;
+  data: {
+    phone_number: string;
+    phone_verified: boolean;
+    billing_address: string;
+  };
 }

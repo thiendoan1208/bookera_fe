@@ -6,6 +6,8 @@ import {
   SignInData,
   GoogleSignUpData,
   GoogleSignInData,
+  UpdateBillingInfoData,
+  UpdateBillingInfoResponse,
 } from "@/types/auth_type";
 
 const signUp = async (
@@ -138,6 +140,19 @@ const resetPassword = async (
   }
 };
 
+const updateBillingInfo = async (
+  data: UpdateBillingInfoData,
+): Promise<UpdateBillingInfoResponse> => {
+  try {
+    const response = await backendInstance.put("/auth/billing", data, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export {
   signUp,
   signIn,
@@ -149,4 +164,5 @@ export {
   sendRecoverCode,
   verifyRecoverCode,
   resetPassword,
+  updateBillingInfo,
 };

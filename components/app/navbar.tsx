@@ -11,6 +11,8 @@ import {
   LogOut,
   Bookmark,
   Settings,
+  MapPinHouse,
+  MessageCircleMore,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -20,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
 import { EditProfileDialog } from "@/components/app/edit-profile-dialog";
+import { BillingAddressDialog } from "@/components/app/billing-address-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,8 +40,43 @@ function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isBillingAddressOpen, setIsBillingAddressOpen] = useState(false);
   const router = useRouter();
   const { user, loading, clearUser } = useUser();
+
+  // Menu items configuration
+  const menuItems = [
+    {
+      id: "edit-profile",
+      label: "Edit Profile",
+      icon: User,
+      onClick: () => setIsEditProfileOpen(true),
+    },
+    {
+      id: "billing-address",
+      label: "Billing Address",
+      icon: MapPinHouse,
+      onClick: () => setIsBillingAddressOpen(true),
+    },
+    {
+      id: "messages",
+      label: "Messages",
+      icon: MessageCircleMore,
+      href: routes.messages,
+    },
+    {
+      id: "saved-items",
+      label: "Saved Items",
+      icon: Bookmark,
+      href: routes.savedItems,
+    },
+    {
+      id: "setting",
+      label: "Setting",
+      icon: Settings,
+      href: routes.settings,
+    },
+  ];
 
   const searchMutation = useMutation({
     mutationFn: (query: string) => searchWorks(query),
@@ -160,27 +198,28 @@ function Navbar() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => setIsEditProfileOpen(true)}
-                >
-                  <User className="mr-2 size-4" />
-                  <span>Edit Profile</span>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuGroup>
-                <Link href="/home/saved">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Bookmark className="mr-2 size-4" />
-                    <span>Saved Items</span>
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/home/settings">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Settings className="mr-2 size-4" />
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                </Link>
+                {menuItems.map((item) => {
+                  return item.href ? (
+                    <Link key={item.id} href={item.href}>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={item.onClick}
+                      >
+                        <item.icon className="mr-2 size-4" />
+                        <span>{item.label}</span>
+                      </DropdownMenuItem>
+                    </Link>
+                  ) : (
+                    <DropdownMenuItem
+                      key={item.id}
+                      className="cursor-pointer"
+                      onClick={item.onClick}
+                    >
+                      <item.icon className="mr-2 size-4" />
+                      <span>{item.label}</span>
+                    </DropdownMenuItem>
+                  );
+                })}
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -211,6 +250,12 @@ function Navbar() {
       <EditProfileDialog
         open={isEditProfileOpen}
         onOpenChange={setIsEditProfileOpen}
+      />
+
+      {/* Billing Address Dialog */}
+      <BillingAddressDialog
+        open={isBillingAddressOpen}
+        onOpenChange={setIsBillingAddressOpen}
       />
     </div>
   );

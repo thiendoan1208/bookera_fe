@@ -9,6 +9,9 @@ interface User {
   email: string;
   avatar_url: string;
   role_id: number;
+  phone_number?: string;
+  phone_verified?: boolean;
+  billing_address?: string;
 }
 
 interface UserContextType {

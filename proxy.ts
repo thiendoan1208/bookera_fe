@@ -11,6 +11,15 @@ export function proxy(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route),
   );
 
+  // Check if accessing checkout page
+  const isCheckoutRoute = request.nextUrl.pathname.startsWith("/checkout");
+  const paymentParam = request.nextUrl.searchParams.get("payment");
+
+  // Protect checkout route - only allow with valid payment param
+  if (isCheckoutRoute && !paymentParam) {
+    return NextResponse.redirect(new URL("/home/marketplace", request.url));
+  }
+
   // If user has token (is authenticated)
   if (token) {
     // Don't allow access to login/signup pages
