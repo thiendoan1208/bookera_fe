@@ -34,6 +34,7 @@ const routes = {
 
   // messages
   messages: "/messages",
+
 };
 
 export default routes;

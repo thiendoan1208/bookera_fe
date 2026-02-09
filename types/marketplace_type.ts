@@ -77,7 +77,7 @@ export interface CreateCheckoutResponse {
 }
 
 export interface VerifyCheckoutSessionResponse {
-  message: string;
+  valid: boolean;
 }
 
 export interface MyListing extends Listing {

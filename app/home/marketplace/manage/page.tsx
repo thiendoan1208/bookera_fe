@@ -10,6 +10,16 @@ import {
   Phone,
   MapPin,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import routes from "@/routes/routes";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMyListings, deleteListing } from "@/service/marketplace_service";
@@ -21,6 +31,11 @@ function ManageListingsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<"all" | "available" | "sold">("all");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{
+    id: number;
+    title: string;
+  } | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["my-listings"],
@@ -63,13 +78,15 @@ function ManageListingsPage() {
   ) => {
     e.preventDefault();
     e.stopPropagation();
+    setItemToDelete({ id: itemId, title: itemTitle });
+    setDeleteDialogOpen(true);
+  };
 
-    if (
-      window.confirm(
-        `Are you sure you want to delete "${itemTitle}"? This action cannot be undone.`,
-      )
-    ) {
-      deleteMutation.mutate(itemId);
+  const confirmDelete = () => {
+    if (itemToDelete) {
+      deleteMutation.mutate(itemToDelete.id);
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
     }
   };
 
@@ -294,6 +311,28 @@ function ManageListingsPage() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Listing</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{itemToDelete?.title}&quot;?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

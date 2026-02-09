@@ -3,7 +3,6 @@
 import Logo from "@/components/app/logo";
 import { Input } from "@/components/ui/input";
 import {
-  Bell,
   LogIn,
   Search,
   LoaderCircle,
@@ -23,6 +22,7 @@ import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
 import { EditProfileDialog } from "@/components/app/edit-profile-dialog";
 import { BillingAddressDialog } from "@/components/app/billing-address-dialog";
+import { NotificationDropdown } from "@/components/app/notification_dropdown";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +43,17 @@ function Navbar() {
   const [isBillingAddressOpen, setIsBillingAddressOpen] = useState(false);
   const router = useRouter();
   const { user, loading, clearUser } = useUser();
+
+  // Helper function to check if avatar URL is valid
+  const isValidAvatarUrl = (url: string | null | undefined): boolean => {
+    if (!url) return false;
+    if (url === "default_avatar") return false;
+    return (
+      url.startsWith("/") ||
+      url.startsWith("http://") ||
+      url.startsWith("https://")
+    );
+  };
 
   // Menu items configuration
   const menuItems = [
@@ -153,8 +164,8 @@ function Navbar() {
             disabled={searchMutation.isPending}
           />
         </div>
-        {/* Noti */}
-        <Bell className="size-5 text-zinc-800 hover:text-zinc-400 cursor-pointer transition-colors" />
+        {/* Notification */}
+        {user && <NotificationDropdown />}
         {/* Login / Profile */}
         <div className="m-0">
           <div className="w-0.5 h-6 bg-zinc-400"></div>
@@ -173,9 +184,9 @@ function Navbar() {
                 <div className="size-9 rounded-full overflow-hidden border-2 border-zinc-300 hover:border-zinc-500 transition-all">
                   <Image
                     src={
-                      user.avatar_url == "default_avatar"
-                        ? "/default_image/default_profile_avatar.jpg"
-                        : user.avatar_url
+                      isValidAvatarUrl(user.avatar_url)
+                        ? user.avatar_url!
+                        : "/default_image/default_profile_avatar.jpg"
                     }
                     alt={user.username}
                     width={36}

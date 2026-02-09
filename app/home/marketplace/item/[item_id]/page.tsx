@@ -25,6 +25,7 @@ import {
   getListingById,
   createCheckoutSession,
 } from "@/service/marketplace_service";
+import { createConversation } from "@/service/message_service";
 import { toast } from "sonner";
 import routes from "@/routes/routes";
 import { useUser } from "@/contexts/UserContext";
@@ -34,6 +35,17 @@ function MarketItemPage() {
   const router = useRouter();
   const item_id = params.item_id as string;
   const { user } = useUser();
+
+  // Helper function to check if avatar URL is valid
+  const isValidAvatarUrl = (url: string | null | undefined): boolean => {
+    if (!url) return false;
+    if (url === "default_avatar") return false;
+    return (
+      url.startsWith("/") ||
+      url.startsWith("http://") ||
+      url.startsWith("https://")
+    );
+  };
 
   const textRef = useRef<HTMLParagraphElement>(null);
 
@@ -72,6 +84,22 @@ function MarketItemPage() {
     },
   });
 
+  const contactSellerMutation = useMutation({
+    mutationFn: createConversation,
+    onSuccess: () => {
+      // Redirect to messages page with the conversation
+      router.push(routes.messages);
+    },
+    onError: (error: Error) => {
+      const axiosError = error as Error & {
+        response?: { data?: { message?: string } };
+      };
+      const message =
+        axiosError.response?.data?.message || "Failed to create conversation";
+      toast.error(message);
+    },
+  });
+
   const handleBuyNow = () => {
     if (!product) return;
 
@@ -80,6 +108,14 @@ function MarketItemPage() {
       listing_id: product.id,
       success_url: `${baseUrl}${routes.checkout}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}${routes.checkout}?payment=cancelled&item_id=${product.id}`,
+    });
+  };
+
+  const handleContactSeller = () => {
+    if (!product) return;
+
+    contactSellerMutation.mutate({
+      listing_id: product.id,
     });
   };
 
@@ -203,9 +239,9 @@ function MarketItemPage() {
             {/* Seller Info */}
             <div className="flex items-center gap-3 mb-4 md:mb-6">
               <div className="relative w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden bg-zinc-200">
-                {product.user?.avatar_url ? (
+                {isValidAvatarUrl(product.user?.avatar_url) ? (
                   <Image
-                    src={product.user.avatar_url}
+                    src={product.user.avatar_url!}
                     alt={product.user.username}
                     fill
                     className="object-cover"
@@ -316,15 +352,26 @@ function MarketItemPage() {
                         Processing...
                       </>
                     ) : (
-                      "Buy It Now"
+                      "Buy Now"
                     )}
                   </Button>
                   <Button
                     variant="outline"
                     className="flex items-center justify-center w-full rounded-full py-4 md:py-6 text-sm sm:text-base md:text-lg font-semibold text-black border-black hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={handleContactSeller}
+                    disabled={contactSellerMutation.isPending}
                   >
-                    <MessageCircleMore className="size-5 md:size-6 mr-2" />
-                    Contact Seller
+                    {contactSellerMutation.isPending ? (
+                      <>
+                        <Loader2 className="size-5 animate-spin mr-2" />
+                        Starting chat...
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircleMore className="size-5 md:size-6 mr-2" />
+                        Contact Seller
+                      </>
+                    )}
                   </Button>
                 </>
               )}

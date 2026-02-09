@@ -108,11 +108,7 @@ export function BillingAddressDialog({
             "recaptcha-container",
             {
               size: "normal",
-              callback: () => {
-                console.log("reCAPTCHA solved");
-              },
               "expired-callback": () => {
-                console.log("reCAPTCHA expired");
                 toast.error("reCAPTCHA expired. Please solve it again.");
               },
             },
@@ -123,7 +119,6 @@ export function BillingAddressDialog({
             .render()
             .then((widgetId) => {
               recaptchaWidgetId.current = widgetId;
-              console.log("reCAPTCHA rendered with ID:", widgetId);
             })
             .catch((error) => {
               console.error("reCAPTCHA render error:", error);
@@ -152,7 +147,6 @@ export function BillingAddressDialog({
       if (recaptchaVerifierRef.current) {
         try {
           recaptchaVerifierRef.current.clear();
-          console.log("reCAPTCHA cleared");
         } catch (error) {
           console.error("Error clearing reCAPTCHA:", error);
         }
