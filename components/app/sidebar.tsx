@@ -1,5 +1,6 @@
 "use client";
 
+import AssitantIcon from "@/components/app/assistant_icon";
 import routes from "@/routes/routes";
 import { Hash, House, Sparkles, Store } from "lucide-react";
 import Link from "next/link";
@@ -34,14 +35,7 @@ function Sidebar() {
               className={`flex flex-col items-center justify-center ${pathname === item.link ? " text-black" : "text-zinc-500"}  cursor-pointer hover:text-black transition-colors`}
             >
               {item.name == "Assistant" ? (
-                <div className="flex flex-col items-center justify-center p-3 bg-linear-to-tr from-purple-500 via-pink-500 to-red-500 rounded-full text-white">
-                  <Link
-                    href={item.link}
-                    className="flex flex-col items-center w-full"
-                  >
-                    {item.icon}
-                  </Link>
-                </div>
+                <AssitantIcon link={item.link} icon={item.icon} />
               ) : (
                 <div className="flex flex-col items-center justify-center p-3 rounded-full transition-colors">
                   <Link

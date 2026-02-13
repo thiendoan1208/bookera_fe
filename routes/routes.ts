@@ -3,7 +3,7 @@ const routes = {
   home: "/home",
   marketplace: "/home/marketplace",
   topic: "/home/topic",
-  assistant: "/home/assistant",
+  assistant: "/assistant",
 
   // item routes
   bookDetails: (key: string) => `/home/${key}`,
@@ -34,7 +34,6 @@ const routes = {
 
   // messages
   messages: "/messages",
-
 };
 
 export default routes;
