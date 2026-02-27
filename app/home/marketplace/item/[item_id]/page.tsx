@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
   ChevronDown,
@@ -20,12 +20,17 @@ import {
   CarouselNext,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getListingById,
   createCheckoutSession,
 } from "@/service/marketplace_service";
 import { createConversation } from "@/service/message_service";
+import {
+  checkSavedItem,
+  createSavedItem,
+  deleteSavedItemByReference,
+} from "@/service/saved_item_service";
 import { toast } from "sonner";
 import routes from "@/routes/routes";
 import { useUser } from "@/contexts/UserContext";
@@ -33,8 +38,10 @@ import { useUser } from "@/contexts/UserContext";
 function MarketItemPage() {
   const params = useParams();
   const router = useRouter();
+  const pathname = usePathname();
   const item_id = params.item_id as string;
   const { user } = useUser();
+  const queryClient = useQueryClient();
 
   // Helper function to check if avatar URL is valid
   const isValidAvatarUrl = (url: string | null | undefined): boolean => {
@@ -52,7 +59,6 @@ function MarketItemPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [isTextClamped, setIsTextClamped] = useState(false);
 
   const {
@@ -66,6 +72,54 @@ function MarketItemPage() {
   });
 
   const product = listing?.data;
+
+  const savedStatus = useQuery({
+    queryKey: ["saved-item-check", "market_item", item_id, user?.id],
+    queryFn: () =>
+      checkSavedItem({
+        item_type: "market_item",
+        market_item_id: parseInt(item_id, 10),
+      }),
+    enabled: !!user && !!item_id,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: createSavedItem,
+    onSuccess: () => {
+      toast.success("Added to saved list");
+      queryClient.invalidateQueries({
+        queryKey: ["saved-item-check", "market_item", item_id, user?.id],
+      });
+      queryClient.invalidateQueries({ queryKey: ["saved-items"] });
+    },
+    onError: (error: Error) => {
+      const axiosError = error as Error & {
+        response?: { data?: { message?: string } };
+      };
+      toast.error(axiosError.response?.data?.message || "Failed to save item");
+    },
+  });
+
+  const unsaveMutation = useMutation({
+    mutationFn: deleteSavedItemByReference,
+    onSuccess: () => {
+      toast.success("Removed from saved list");
+      queryClient.invalidateQueries({
+        queryKey: ["saved-item-check", "market_item", item_id, user?.id],
+      });
+      queryClient.invalidateQueries({ queryKey: ["saved-items"] });
+    },
+    onError: (error: Error) => {
+      const axiosError = error as Error & {
+        response?: { data?: { message?: string } };
+      };
+      toast.error(axiosError.response?.data?.message || "Failed to unsave item");
+    },
+  });
+
+  const isSaved = savedStatus.data?.data.saved || false;
+  const isSaving = saveMutation.isPending || unsaveMutation.isPending;
+  const isCheckingSaved = !!user && savedStatus.isLoading;
 
   const checkoutMutation = useMutation({
     mutationFn: createCheckoutSession,
@@ -116,6 +170,31 @@ function MarketItemPage() {
 
     contactSellerMutation.mutate({
       listing_id: product.id,
+    });
+  };
+
+  const handleToggleSaved = () => {
+    if (!product) return;
+
+    if (!user) {
+      router.push(`/login?next=${encodeURIComponent(pathname)}`);
+      return;
+    }
+
+    if (isSaved) {
+      unsaveMutation.mutate({
+        item_type: "market_item",
+        market_item_id: product.id,
+      });
+      return;
+    }
+
+    saveMutation.mutate({
+      item_type: "market_item",
+      market_item_id: product.id,
+      preview_image_url: product.images?.[0]?.image_url || null,
+      title: product.title,
+      redirect_url: routes.itemDetail(product.id),
     });
   };
 
@@ -222,17 +301,22 @@ function MarketItemPage() {
                 {product.title}
               </h1>
               <button
-                onClick={() => setIsSaved(!isSaved)}
+                onClick={handleToggleSaved}
                 className="shrink-0 p-2 hover:bg-gray-100 rounded-full transition-colors"
                 aria-label="Save item"
+                disabled={isSaving || isCheckingSaved}
               >
-                <Bookmark
-                  className={`w-6 h-6 md:w-7 md:h-7 transition-colors ${
-                    isSaved
-                      ? "fill-yellow-400 stroke-yellow-400"
-                      : "stroke-gray-600 hover:stroke-yellow-400"
-                  }`}
-                />
+                {isSaving || isCheckingSaved ? (
+                  <Loader2 className="w-6 h-6 md:w-7 md:h-7 animate-spin text-zinc-500" />
+                ) : (
+                  <Bookmark
+                    className={`w-6 h-6 md:w-7 md:h-7 transition-colors ${
+                      isSaved
+                        ? "fill-yellow-400 stroke-yellow-400"
+                        : "stroke-gray-600 hover:stroke-yellow-400"
+                    }`}
+                  />
+                )}
               </button>
             </div>
 

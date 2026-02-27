@@ -77,7 +77,7 @@ function Navbar() {
     },
     {
       id: "saved-items",
-      label: "Saved Items",
+      label: "Saved",
       icon: Bookmark,
       href: routes.savedItems,
     },

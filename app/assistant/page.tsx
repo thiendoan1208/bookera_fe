@@ -198,7 +198,7 @@ function AssistantPage() {
             // Welcome Screen
             <div className="h-full flex flex-col items-center justify-center px-4 max-w-4xl mx-auto">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-gradient-to-br from-zinc-900 to-zinc-600 rounded-full text-white shadow-lg">
+                <div className="p-3 bg-linear-to-br from-zinc-900 to-zinc-600 rounded-full text-white shadow-lg">
                   <Sparkles size={32} />
                 </div>
                 <h1 className="text-4xl font-bold text-zinc-800">

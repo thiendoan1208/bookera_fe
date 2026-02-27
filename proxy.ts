@@ -13,11 +13,29 @@ export function proxy(request: NextRequest) {
 
   // Check if accessing checkout page
   const isCheckoutRoute = request.nextUrl.pathname.startsWith("/checkout");
+  const isAssistantRoute = request.nextUrl.pathname.startsWith("/assistant");
+  const isSavedItemsRoute = request.nextUrl.pathname.startsWith(
+    "/home/saved_items",
+  );
   const paymentParam = request.nextUrl.searchParams.get("payment");
 
   // Protect checkout route - only allow with valid payment param
   if (isCheckoutRoute && !paymentParam) {
     return NextResponse.redirect(new URL("/home/marketplace", request.url));
+  }
+
+  // Protect assistant route - only allow authenticated users
+  if (isAssistantRoute && !token) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", request.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Protect saved items route - only allow authenticated users
+  if (isSavedItemsRoute && !token) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", request.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   // If user has token (is authenticated)

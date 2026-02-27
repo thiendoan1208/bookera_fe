@@ -6,17 +6,30 @@ import {
   getAuthorDetails,
   getWorksBySubject,
 } from "@/service/open_lib";
-import { useQuery, useQueries } from "@tanstack/react-query";
+import {
+  checkSavedItem,
+  createSavedItem,
+  deleteSavedItemByReference,
+} from "@/service/saved_item_service";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import Image from "next/image";
 import { use } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Bookmark, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getRandomSubject, slugify } from "@/lib/utils";
 import NoSwitchCarousel from "@/components/app/no_switch_carousel";
 import Link from "next/link";
 import routes from "@/routes/routes";
+import { useUser } from "@/contexts/UserContext";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface DetailPageProps {
   params: Promise<{
@@ -29,6 +42,10 @@ function DetailPage({ params }: DetailPageProps) {
   const { type, workId } = use(params);
   const [isDescriptionExpanded, setIsDescriptionExpanded] =
     React.useState(false);
+  const queryClient = useQueryClient();
+  const { user } = useUser();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const bookDetail = useQuery({
     queryKey: ["bookDetail", workId],
@@ -59,6 +76,86 @@ function DetailPage({ params }: DetailPageProps) {
     },
     enabled: !!bookDetail.data,
   });
+
+  const savedStatus = useQuery({
+    queryKey: ["saved-item-check", "book", workId, user?.id],
+    queryFn: () =>
+      checkSavedItem({
+        item_type: "book",
+        work_id: workId,
+      }),
+    enabled: !!user && !!workId,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: createSavedItem,
+    onSuccess: () => {
+      toast.success("Added to saved list");
+      queryClient.invalidateQueries({
+        queryKey: ["saved-item-check", "book", workId, user?.id],
+      });
+      queryClient.invalidateQueries({ queryKey: ["saved-items"] });
+    },
+    onError: (error: Error) => {
+      const axiosError = error as Error & {
+        response?: { data?: { message?: string } };
+      };
+      toast.error(axiosError.response?.data?.message || "Failed to save item");
+    },
+  });
+
+  const unsaveMutation = useMutation({
+    mutationFn: deleteSavedItemByReference,
+    onSuccess: () => {
+      toast.success("Removed from saved list");
+      queryClient.invalidateQueries({
+        queryKey: ["saved-item-check", "book", workId, user?.id],
+      });
+      queryClient.invalidateQueries({ queryKey: ["saved-items"] });
+    },
+    onError: (error: Error) => {
+      const axiosError = error as Error & {
+        response?: { data?: { message?: string } };
+      };
+      toast.error(axiosError.response?.data?.message || "Failed to unsave item");
+    },
+  });
+
+  const isSaved = savedStatus.data?.data.saved || false;
+  const isSaving = saveMutation.isPending || unsaveMutation.isPending;
+  const isCheckingSaved = !!user && savedStatus.isLoading;
+
+  const handleToggleSaved = () => {
+    if (!bookDetail.data) return;
+
+    if (!user) {
+      router.push(`/login?next=${encodeURIComponent(pathname)}`);
+      return;
+    }
+
+    if (isSaved) {
+      unsaveMutation.mutate({
+        item_type: "book",
+        work_id: workId,
+      });
+      return;
+    }
+
+    const coverId =
+      bookDetail.data.covers && bookDetail.data.covers.length > 0
+        ? bookDetail.data.covers[0]
+        : null;
+
+    saveMutation.mutate({
+      item_type: "book",
+      work_id: workId,
+      preview_image_url: coverId
+        ? `${process.env.NEXT_PUBLIC_OPEN_LIBRARY_COVERS_URL}/b/id/${coverId}-M.jpg`
+        : null,
+      title: bookDetail.data.title,
+      redirect_url: routes.bookDetails(`${type}/${workId}`),
+    });
+  };
 
   return (
     <div className="pl-28 pt-18 pr-10">
@@ -151,6 +248,24 @@ function DetailPage({ params }: DetailPageProps) {
                 <h1 className="text-6xl font-extrabold italic text-zinc-800 font-[sacramento]">
                   {bookDetail.data.title}
                 </h1>
+                <button
+                  onClick={handleToggleSaved}
+                  className="shrink-0 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  aria-label="Save item"
+                  disabled={isSaving || isCheckingSaved}
+                >
+                  {isSaving || isCheckingSaved ? (
+                    <Loader2 className="w-6 h-6 md:w-7 md:h-7 animate-spin text-zinc-500" />
+                  ) : (
+                    <Bookmark
+                      className={`w-6 h-6 md:w-7 md:h-7 transition-colors ${
+                        isSaved
+                          ? "fill-yellow-400 stroke-yellow-400"
+                          : "stroke-gray-600 hover:stroke-yellow-400"
+                      }`}
+                    />
+                  )}
+                </button>
               </div>
 
               {/* Authors */}
