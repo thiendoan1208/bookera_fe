@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import AssistantChatSidebar from "@/components/app/assistant_chat_sidebar";
 import { Sparkles, Send } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getAIMessages,
   sendAIMessage,
-  createAIConversation,
 } from "@/service/ai_service";
 import { AIMessage } from "@/types/ai_type";
 import { useUser } from "@/contexts/UserContext";
 import ReactMarkdown from "react-markdown";
+import Image from "next/image";
 
 // Progressive line-by-line reveal for AI responses
 function StreamingMarkdown({
@@ -93,7 +93,7 @@ function AssistantPage() {
     enabled: !!selectedChatId,
   });
 
-  const messages = messagesData?.data || [];
+  const messages = useMemo(() => messagesData?.data || [], [messagesData]);
 
   useEffect(() => {
     scrollToBottom();
@@ -123,15 +123,6 @@ function AssistantPage() {
     },
     onError: () => {
       setPendingUserMessage(null);
-    },
-  });
-
-  // Create new conversation mutation
-  const createConversationMutation = useMutation({
-    mutationFn: createAIConversation,
-    onSuccess: (data) => {
-      setSelectedChatId(data.data.id);
-      queryClient.invalidateQueries({ queryKey: ["aiConversations"] });
     },
   });
 
@@ -197,21 +188,23 @@ function AssistantPage() {
           !sendMessageMutation.isPending ? (
             // Welcome Screen
             <div className="h-full flex flex-col items-center justify-center px-4 max-w-4xl mx-auto">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-linear-to-br from-zinc-900 to-zinc-600 rounded-full text-white shadow-lg">
+              <div className="flex items-center gap-3 mb-4 animate-[fade-in_0.4s_ease-out]">
+                <div className="relative p-3 bg-linear-to-br from-zinc-900 to-zinc-600 rounded-full text-white shadow-lg">
+                  <span className="absolute inset-0 rounded-full bg-zinc-400/20 blur-md animate-pulse" />
                   <Sparkles size={32} />
                 </div>
                 <h1 className="text-4xl font-bold text-zinc-800">
                   Hi {user?.username || "there"}
                 </h1>
               </div>
-              <h2 className="text-2xl text-zinc-600 mb-4">
+              <h2 className="text-2xl text-zinc-600 mb-4 animate-[fade-in_0.6s_ease-out]">
                 How are you feeling today?
               </h2>
-              <p className="text-sm text-zinc-500 mb-8 text-center max-w-2xl">
+              <p className="text-sm text-zinc-500 mb-8 text-center max-w-2xl animate-[fade-in_0.8s_ease-out]">
                 Tell me your mood or describe a book you&apos;re looking for.
                 I&apos;ll help you find the perfect read.
               </p>
+              <div className="w-20 h-1 rounded-full bg-linear-to-r from-transparent via-zinc-400 to-transparent animate-pulse" />
             </div>
           ) : (
             // Chat Messages
@@ -256,9 +249,11 @@ function AssistantPage() {
                     {message.role === "user" && (
                       <div className="shrink-0">
                         {user?.avatar_url ? (
-                          <img
+                          <Image
                             src={user.avatar_url}
                             alt={user.username}
+                            width={32}
+                            height={32}
                             className="w-8 h-8 rounded-full object-cover"
                           />
                         ) : (
@@ -282,9 +277,11 @@ function AssistantPage() {
                   </div>
                   <div className="shrink-0">
                     {user?.avatar_url ? (
-                      <img
+                      <Image
                         src={user.avatar_url}
                         alt={user.username}
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-full object-cover"
                       />
                     ) : (

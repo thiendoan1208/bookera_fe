@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Plus, MessageSquare, Loader2, Trash2 } from "lucide-react";
+import { Menu, Plus, Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAIConversations, deleteAIConversation } from "@/service/ai_service";

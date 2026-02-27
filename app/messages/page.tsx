@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,6 @@ import {
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Search,
   Send,
   Menu,
   X,
@@ -34,7 +33,6 @@ import {
   Trash2,
   CheckCheck,
   Paperclip,
-  ImageIcon,
   XCircle,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -162,7 +160,7 @@ function MessagePage() {
   // Mark all conversations as read mutation
   const markAllAsReadMutation = useMutation({
     mutationFn: markAllConversationsAsRead,
-    onSuccess: (response) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       toast.success("All conversations marked as read");
     },
@@ -198,8 +196,11 @@ function MessagePage() {
     },
   });
 
-  const conversations = conversationsData?.data || [];
-  const messages = messagesData?.data || [];
+  const conversations = useMemo(
+    () => conversationsData?.data || [],
+    [conversationsData],
+  );
+  const messages = useMemo(() => messagesData?.data || [], [messagesData]);
 
   const selectedConversation = conversations.find(
     (conv) => conv.id === selectedConversationId,
@@ -242,7 +243,7 @@ function MessagePage() {
         inputMessageRef.current?.focus();
       }, 0);
     }
-  }, [selectedConversationId]);
+  }, [selectedConversationId, markAsReadMutation]);
 
   // Socket.IO: Listen for new messages
   useEffect(() => {
@@ -290,7 +291,7 @@ function MessagePage() {
         const uploadResult =
           await uploadImageMutation.mutateAsync(selectedImage);
         imageUrl = uploadResult.data.image_url;
-      } catch (error) {
+      } catch {
         return; // Error already handled by mutation
       }
     }

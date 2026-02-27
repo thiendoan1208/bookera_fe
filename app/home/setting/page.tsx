@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,

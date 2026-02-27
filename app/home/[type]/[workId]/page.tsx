@@ -177,7 +177,7 @@ function DetailPage({ params }: DetailPageProps) {
 
   return (
     <div className="pl-28 pt-16 pr-10 pb-12 min-h-screen bg-linear-to-b from-zinc-50 via-white to-zinc-100/60">
-      <div className="max-w-[1500px] mx-auto space-y-8">
+      <div className="max-w-375 mx-auto space-y-8">
         <div className="rounded-3xl border border-zinc-200/70 bg-white/80 backdrop-blur-sm shadow-sm p-6 lg:p-8">
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
             <div className="xl:col-span-3">

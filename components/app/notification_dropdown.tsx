@@ -118,7 +118,7 @@ export function NotificationDropdown() {
   useEffect(() => {
     if (!socket) return;
 
-    const handleNewNotification = (notification: Notification) => {
+    const handleNewNotification = () => {
       // Just update the notification count and list, no toast
       queryClient.invalidateQueries({ queryKey: ["unreadCount"] });
       if (isOpen) {
