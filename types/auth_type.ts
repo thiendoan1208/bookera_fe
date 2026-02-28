@@ -44,6 +44,7 @@ export interface UpdateBillingInfoData {
   phone_number?: string;
   phone_verified?: boolean;
   billing_address?: string;
+  firebase_id_token?: string;
 }
 
 export interface UpdateBillingInfoResponse {

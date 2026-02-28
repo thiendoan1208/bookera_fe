@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Phone, MapPin, ArrowLeft, Pencil } from "lucide-react";
 import {
   Dialog,
@@ -47,9 +47,35 @@ export function BillingAddressDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [confirmationResult, setConfirmationResult] =
     useState<ConfirmationResult | null>(null);
+  const [firebaseIdToken, setFirebaseIdToken] = useState("");
+  const [recaptchaInitKey, setRecaptchaInitKey] = useState(0);
 
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
-  const recaptchaWidgetId = useRef<number | null>(null);
+
+  const initRecaptcha = useCallback(() => {
+    const container = document.getElementById("recaptcha-container");
+    if (!container) {
+      console.error("reCAPTCHA container not found");
+      return;
+    }
+
+    container.innerHTML = "";
+
+    recaptchaVerifierRef.current = new RecaptchaVerifier(
+      auth,
+      "recaptcha-container",
+      {
+        size: "normal",
+        "expired-callback": () => {
+          toast.error("reCAPTCHA expired. Please solve it again.");
+        },
+      },
+    );
+
+    recaptchaVerifierRef.current.render().catch((error) => {
+      console.error("reCAPTCHA render error:", error);
+    });
+  }, []);
 
   // Mutation for updating billing info
   const updateBillingMutation = useMutation({
@@ -97,40 +123,15 @@ export function BillingAddressDialog({
     if (open && step === "phone" && !recaptchaVerifierRef.current) {
       const timer = setTimeout(() => {
         try {
-          const container = document.getElementById("recaptcha-container");
-          if (!container) {
-            console.error("reCAPTCHA container not found");
-            return;
-          }
-
-          recaptchaVerifierRef.current = new RecaptchaVerifier(
-            auth,
-            "recaptcha-container",
-            {
-              size: "normal",
-              "expired-callback": () => {
-                toast.error("reCAPTCHA expired. Please solve it again.");
-              },
-            },
-          );
-
-          // Render the widget
-          recaptchaVerifierRef.current
-            .render()
-            .then((widgetId) => {
-              recaptchaWidgetId.current = widgetId;
-            })
-            .catch((error) => {
-              console.error("reCAPTCHA render error:", error);
-            });
+          initRecaptcha();
         } catch (error) {
           console.error("reCAPTCHA init error:", error);
         }
-      }, 500);
+      }, 400);
 
       return () => clearTimeout(timer);
     }
-  }, [open, step]);
+  }, [open, step, recaptchaInitKey, initRecaptcha]);
 
   // Cleanup on close
   useEffect(() => {
@@ -142,6 +143,7 @@ export function BillingAddressDialog({
       setOtp("");
       setAddress("");
       setConfirmationResult(null);
+      setFirebaseIdToken("");
 
       // Clear reCAPTCHA
       if (recaptchaVerifierRef.current) {
@@ -151,7 +153,6 @@ export function BillingAddressDialog({
           console.error("Error clearing reCAPTCHA:", error);
         }
         recaptchaVerifierRef.current = null;
-        recaptchaWidgetId.current = null;
       }
     }
   }, [open]);
@@ -216,6 +217,7 @@ export function BillingAddressDialog({
         }
         recaptchaVerifierRef.current = null;
       }
+      setRecaptchaInitKey((prev) => prev + 1);
     } finally {
       setIsLoading(false);
     }
@@ -235,12 +237,31 @@ export function BillingAddressDialog({
 
     try {
       setIsLoading(true);
-      await confirmationResult.confirm(otp);
+      const credential = await confirmationResult.confirm(otp);
+      const idToken = await credential.user.getIdToken();
+      setFirebaseIdToken(idToken);
       toast.success("Phone verified successfully!");
       setStep("address");
     } catch (error: unknown) {
       console.error("Verify OTP error:", error);
-      toast.error("Invalid OTP code. Please try again.");
+      if (error instanceof Error && "code" in error) {
+        const firebaseError = error as { code: string };
+        if (firebaseError.code === "auth/invalid-verification-code") {
+          toast.error("Invalid OTP code. Please try again.");
+          return;
+        }
+        if (firebaseError.code === "auth/code-expired") {
+          toast.error("OTP expired. Please request a new code.");
+          return;
+        }
+        if (firebaseError.code === "auth/user-disabled") {
+          toast.error(
+            "Firebase blocked this phone-auth user. Please check Firebase settings or try another number.",
+          );
+          return;
+        }
+      }
+      toast.error("Failed to verify OTP. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -253,10 +274,16 @@ export function BillingAddressDialog({
       return;
     }
 
+    if (!user?.phone_verified && !firebaseIdToken) {
+      toast.error("Please verify your phone number first");
+      return;
+    }
+
     updateBillingMutation.mutate({
       phone_number: phoneNumber,
-      phone_verified: true,
+      phone_verified: firebaseIdToken ? true : undefined,
       billing_address: address,
+      firebase_id_token: firebaseIdToken || undefined,
     });
   };
 
@@ -322,7 +349,7 @@ export function BillingAddressDialog({
                     </button>
                   </div>
                   <p className="text-base font-medium">{phoneNumber}</p>
-                  <p className="text-xs text-green-600 mt-1">✓ Verified</p>
+                  <p className="text-xs text-green-600 mt-1">Verified</p>
                 </div>
 
                 {/* Billing Address Display */}
