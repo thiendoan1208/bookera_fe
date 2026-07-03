@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# Bookera Frontend Client
 
-First, run the development server:
+A responsive, high-performance web client for **Bookera**, an e-commerce marketplace for buying and selling books, featuring real-time chat, secure Stripe checkout, and an interactive AI book assistant.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Technology Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Framework:** Next.js 16 (App Router)
+- **UI Library:** React 19 & TypeScript
+- **Styling:** TailwindCSS v4 (Sleek modern design)
+- **Animations:** Framer Motion (Fluid transitions and micro-interactions)
+- **State Management:** TanStack Query (React Query) (Server-state caching)
+- **Authentication:** `@react-oauth/google` (Google Sign-In)
+- **Payments:** `@stripe/stripe-js` (Stripe Checkout integration)
+- **Real-Time messaging:** Socket.io-client
+- **UI Components:** Radix UI primitives & Lucide Icons
+- **Notifications:** Sonner
+- **Cloud Analytics/Messaging:** Firebase
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔑 Key Features
 
-## Learn More
+### 1. Modern E-Commerce UI
+- Clean, intuitive book listing feed displaying book covers, condition details, and pricing.
+- Advanced client-side filtering by genre, price range, book condition, and author.
+- Responsive, grid-based layouts optimized for desktop, tablet, and mobile browsers.
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Conversational AI Assistant Interface
+- Interactive, slide-out chat interface to converse with **Kera**, the AI Book Assistant.
+- Markdown rendering for rich-text responses (titles, bullet lists, blockquotes, bolding, external links).
+- Automated chat limits displayed to the user based on daily usage quotas.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Real-Time Chat & Inbox
+- Dedicated Chat Inbox interface displaying active conversations between buyers and sellers.
+- Instant, WebSocket-driven messaging using **Socket.io-client** with live typing indicators.
+- Live notifications for new messages received while browsing other sections of the app.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 4. Secure Payments Integration
+- Secure checkout process integrating **Stripe elements**.
+- Direct redirects to payment success/error landing pages with transaction verification.
